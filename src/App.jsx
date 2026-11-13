@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import BottomNav from './components/BottomNav.jsx'
+import SyncStatus from './components/SyncStatus.jsx'
 import Home from './pages/Home.jsx'
 import GameDetail from './pages/GameDetail.jsx'
 import Genres from './pages/Genres.jsx'
@@ -10,6 +11,7 @@ import Profile from './pages/Profile.jsx'
 export default function App() {
   return (
     <div className="app">
+      <SyncStatus />
       <main className="main">
         <Routes>
           <Route path="/" element={<Home />} />

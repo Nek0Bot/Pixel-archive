@@ -8,8 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Arsip Piksel',
-        short_name: 'Arsip Piksel',
+        name: 'Pixel Archive',
+        short_name: 'Pixel Archive',
         description: 'Katalog game indie dan retro',
         theme_color: '#1B1F3B',
         background_color: '#EEF0F6',
@@ -20,8 +20,27 @@ export default defineConfig({
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
         ]
       },
-      workbox: { navigateFallbackDenylist: [/^\/api/] }
+      workbox: {
+        navigateFallbackDenylist: [/^\/api/],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.destination === 'image',
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pixel-archive-images',
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'pixel-archive-fonts',
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 * 365 }
+            }
+          }
+        ]
+      }
     })
-  ],
-  server: { proxy: { '/api': 'http://localhost:3001' } }
+  ]
 })
