@@ -1,0 +1,156 @@
+[
+  {
+    "id": 1,
+    "title": "Stardew Valley",
+    "genre": "simulasi",
+    "year": 2016,
+    "developer": "ConcernedApe",
+    "rating": 4.9,
+    "platform": "PC, Switch, Mobile",
+    "emoji": "🌾",
+    "description": "Warisi kebun tua milik kakekmu, lalu bangun kehidupan baru dengan bertani, memancing, menambang, dan berteman dengan penduduk desa."
+  },
+  {
+    "id": 2,
+    "title": "Celeste",
+    "genre": "platformer",
+    "year": 2018,
+    "developer": "Maddy Makes Games",
+    "rating": 4.8,
+    "platform": "PC, Switch, PS4",
+    "emoji": "🏔️",
+    "description": "Bantu Madeline mendaki Gunung Celeste. Kontrol presisi, level menantang, dan cerita yang menyentuh tentang menghadapi diri sendiri."
+  },
+  {
+    "id": 3,
+    "title": "Undertale",
+    "genre": "rpg",
+    "year": 2015,
+    "developer": "Toby Fox",
+    "rating": 4.8,
+    "platform": "PC, Switch, PS4",
+    "emoji": "❤️",
+    "description": "RPG di mana kamu tidak harus membunuh siapa pun. Setiap monster bisa diajak bicara, dan pilihanmu mengubah akhir cerita."
+  },
+  {
+    "id": 4,
+    "title": "Hollow Knight",
+    "genre": "aksi",
+    "year": 2017,
+    "developer": "Team Cherry",
+    "rating": 4.9,
+    "platform": "PC, Switch, PS4, Xbox",
+    "emoji": "🦋",
+    "description": "Jelajahi kerajaan serangga bawah tanah Hallownest yang luas, penuh bos sulit dan rahasia tersembunyi."
+  },
+  {
+    "id": 5,
+    "title": "Baba Is You",
+    "genre": "puzzle",
+    "year": 2019,
+    "developer": "Hempuli",
+    "rating": 4.7,
+    "platform": "PC, Switch, Mobile",
+    "emoji": "🐑",
+    "description": "Susun balok aturan di dalam level untuk mengubah cara kerja permainan itu sendiri. Setiap level adalah teka-teki unik."
+  },
+  {
+    "id": 6,
+    "title": "Terraria",
+    "genre": "aksi",
+    "year": 2011,
+    "developer": "Re-Logic",
+    "rating": 4.8,
+    "platform": "PC, Console, Mobile",
+    "emoji": "⛏️",
+    "description": "Gali, bangun, dan bertarung di dunia 2D yang dibuat acak. Kumpulkan bahan untuk membuat senjata dan menantang bos."
+  },
+  {
+    "id": 7,
+    "title": "Super Mario Bros.",
+    "genre": "platformer",
+    "year": 1985,
+    "developer": "Nintendo",
+    "rating": 4.7,
+    "platform": "NES, Switch Online",
+    "emoji": "🍄",
+    "description": "Game platformer klasik yang membentuk genrenya. Lompati rintangan dan selamatkan sang putri dari Bowser."
+  },
+  {
+    "id": 8,
+    "title": "Tetris",
+    "genre": "puzzle",
+    "year": 1984,
+    "developer": "Alexey Pajitnov",
+    "rating": 4.6,
+    "platform": "Hampir semua platform",
+    "emoji": "🟦",
+    "description": "Susun balok yang jatuh agar membentuk baris penuh. Sederhana, adiktif, dan tidak lekang oleh waktu."
+  },
+  {
+    "id": 9,
+    "title": "Chrono Trigger",
+    "genre": "rpg",
+    "year": 1995,
+    "developer": "Square",
+    "rating": 4.8,
+    "platform": "SNES, PC, Mobile",
+    "emoji": "⏳",
+    "description": "RPG perjalanan waktu dengan sistem tempur aktif dan banyak akhir cerita. Sering disebut salah satu RPG terbaik sepanjang masa."
+  },
+  {
+    "id": 10,
+    "title": "Cities: Skylines",
+    "genre": "simulasi",
+    "year": 2015,
+    "developer": "Colossal Order",
+    "rating": 4.5,
+    "platform": "PC, Console",
+    "emoji": "🏙️",
+    "description": "Rancang jalan, listrik, dan transportasi untuk membangun kota dari desa kecil hingga metropolis."
+  },
+  {
+    "id": 11,
+    "title": "Vampire Survivors",
+    "genre": "aksi",
+    "year": 2022,
+    "developer": "poncle",
+    "rating": 4.6,
+    "platform": "PC, Console, Mobile",
+    "emoji": "🧛",
+    "description": "Bertahan hidup dari gelombang monster. Senjata menembak otomatis, kamu fokus bergerak dan memilih peningkatan."
+  },
+  {
+    "id": 12,
+    "title": "Shovel Knight",
+    "genre": "platformer",
+    "year": 2014,
+    "developer": "Yacht Club Games",
+    "rating": 4.7,
+    "platform": "PC, Switch, Console",
+    "emoji": "🛡️",
+    "description": "Platformer bergaya 8-bit dengan ksatria bersekop. Menggabungkan kontrol klasik dengan desain level modern."
+  },
+  {
+    "id": 13,
+    "title": "Disco Elysium",
+    "genre": "rpg",
+    "year": 2019,
+    "developer": "ZA/UM",
+    "rating": 4.8,
+    "platform": "PC, Console",
+    "emoji": "🕵️",
+    "description": "Kamu detektif amnesia yang menyelidiki sebuah pembunuhan. Tanpa pertarungan, semua dipecahkan lewat dialog dan keputusan."
+  },
+  {
+    "id": 14,
+    "title": "The Witness",
+    "genre": "puzzle",
+    "year": 2016,
+    "developer": "Thekla, Inc.",
+    "rating": 4.4,
+    "platform": "PC, Console, iOS",
+    "emoji": "🏝️",
+    "description": "Jelajahi pulau misterius yang penuh panel teka-teki garis. Tanpa instruksi, kamu belajar aturannya lewat pengamatan."
+  }
+]

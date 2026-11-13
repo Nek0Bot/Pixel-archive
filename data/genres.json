@@ -1,0 +1,7 @@
+[
+  { "id": "rpg", "nama": "RPG", "emoji": "🗡️", "warna": "#E0457B", "deskripsi": "Petualangan panjang dengan cerita, karakter, dan pilihan." },
+  { "id": "platformer", "nama": "Platformer", "emoji": "🍄", "warna": "#14A3A1", "deskripsi": "Lompat, hindari jebakan, dan capai garis akhir." },
+  { "id": "puzzle", "nama": "Puzzle", "emoji": "🧩", "warna": "#F2B632", "deskripsi": "Asah logika dengan teka-teki yang makin rumit." },
+  { "id": "simulasi", "nama": "Simulasi", "emoji": "🌱", "warna": "#5B7FE8", "deskripsi": "Kelola kebun, kota, atau kehidupan dengan santai." },
+  { "id": "aksi", "nama": "Aksi", "emoji": "⚔️", "warna": "#E8743B", "deskripsi": "Pertarungan cepat yang menguji refleks." }
+]
