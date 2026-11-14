@@ -5,6 +5,7 @@ const tabs = [
   { to: '/', label: 'Game', icon: '🎮', end: true },
   { to: '/genre', label: 'Genre', icon: '🗂️' },
   { to: '/favorit', label: 'Favorit', icon: '♥', badge: true },
+  { to: '/aktivitas', label: 'Aktivitas', icon: '📜' },
   { to: '/profile', label: 'Profil', icon: '👤' }
 ]
 

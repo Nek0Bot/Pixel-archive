@@ -8,6 +8,8 @@ import GenreDetail from './pages/GenreDetail.jsx'
 import GameForm from './pages/GameForm.jsx'
 import Favorites from './pages/Favorites.jsx'
 import PWABadge from './components/PWABadge.jsx'
+import Activity from './pages/Activity.jsx'
+import ThemeToggle from './components/ThemeToggle.jsx'
 import Profile from './pages/Profile.jsx'
 
 export default function App() {
@@ -16,6 +18,7 @@ export default function App() {
       <SyncStatus />
       <PWABadge />
       <main className="main">
+        <ThemeToggle />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/game/baru" element={<GameForm />} />
@@ -24,6 +27,7 @@ export default function App() {
           <Route path="/genre" element={<Genres />} />
           <Route path="/genre/:id" element={<GenreDetail />} />
           <Route path="/favorit" element={<Favorites />} />
+          <Route path="/aktivitas" element={<Activity />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<p className="state">Halaman tidak ditemukan.</p>} />
         </Routes>

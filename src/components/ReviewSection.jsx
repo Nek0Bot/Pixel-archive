@@ -19,7 +19,7 @@ function ReviewForm({ user, onKirim }) {
     setKirim(true)
     try {
       saveUser({ name: nama })
-      await onKirim({ reviewer_name: nama.trim() || 'Anonim', rating: Number(rating), comment: komentar.trim(), user_id: user.id })
+      await onKirim({ reviewer_name: nama.trim() || 'Anonymous', rating: Number(rating), comment: komentar.trim(), user_id: user.id })
     } catch (err) {
       setGalat(err.message)
       setKirim(false)
@@ -30,7 +30,7 @@ function ReviewForm({ user, onKirim }) {
     <form className="form" onSubmit={submit}>
       <div className="dua">
         <label>Nama
-          <input value={nama} onChange={(e) => setNama(e.target.value)} maxLength={40} placeholder="Anonim" />
+          <input value={nama} onChange={(e) => setNama(e.target.value)} maxLength={40} placeholder="Anonymous" />
         </label>
         <label>Rating
           <select value={rating} onChange={(e) => setRating(e.target.value)}>

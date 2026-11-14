@@ -31,7 +31,7 @@ export default function Profile() {
       </dl>
       <form className="form" onSubmit={simpan}>
         <label>Nama panggilan untuk review
-          <input value={nama} onChange={(e) => { setNama(e.target.value); setTersimpan(false) }} maxLength={40} placeholder="Anonim" />
+          <input value={nama} onChange={(e) => { setNama(e.target.value); setTersimpan(false) }} maxLength={40} placeholder="Anonymous" />
         </label>
         <button className="tombol" type="submit">Simpan nama</button>
         {tersimpan && <p className="catatan" role="status">Nama tersimpan di perangkat ini.</p>}

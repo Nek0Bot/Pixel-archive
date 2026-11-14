@@ -3,8 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
-  plugins: [ ...
+  plugins: [
     react(),
     VitePWA({
       // Service worker ditulis manual di src/sw.js (Modul 4); plugin hanya membuat manifest
