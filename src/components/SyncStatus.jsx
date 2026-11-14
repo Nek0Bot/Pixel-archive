@@ -39,7 +39,7 @@ export default function SyncStatus() {
   }, [])
 
   let message = 'Online · semua perubahan tersinkron'
-  if (!isOnline) message = `Offline · ${pending} perubahan menunggu sinkronisasi`
+  if (!isOnline) message = pending ? `Offline · ${pending} perubahan menunggu sinkronisasi` : 'Offline · memakai data tersimpan di perangkat'
   else if (syncing) message = 'Menyinkronkan perubahan...'
   else if (pending) message = `Online · ${pending} perubahan menunggu sinkronisasi`
 

@@ -8,14 +8,13 @@ const networkError = (error) =>
   /failed to fetch|networkerror|load failed|fetch failed/i.test(String(error?.message || ''))
 
 const fromRow = (row) => ({ ...row, year: Number(row.year), rating: Number(row.rating), genre: row.genre_id })
+// Hanya kolom tabel games yang dikirim ke Supabase (field lokal seperti _syncedId dibuang)
+const KOLOM = ['title', 'developer', 'platform', 'emoji', 'description', 'image_url']
 const toRow = (game) => {
-  const { genre, id, _pending, ...rest } = game
-  return {
-    ...rest,
-    genre_id: String(genre),
-    year: Number(game.year),
-    rating: Number(game.rating)
-  }
+  const row = { genre_id: String(game.genre), year: Number(game.year), rating: Number(game.rating) }
+  for (const k of KOLOM) row[k] = game[k] ?? null
+  row.image_url = row.image_url || null
+  return row
 }
 const localId = () => -(Date.now() + Math.floor(Math.random() * 10000))
 
@@ -53,6 +52,10 @@ export async function getGames(q = '') {
       if (error) throw error
       const games = (data || []).map(fromRow)
       await db.games.bulkPut(games)
+      // Buang cache game yang sudah dihapus di server (kecuali data lokal yang belum sinkron)
+      const idServer = new Set(games.map((g) => g.id))
+      const basi = (await db.games.toArray()).filter((g) => g.id > 0 && !idServer.has(g.id)).map((g) => g.id)
+      if (basi.length) await db.games.bulkDelete(basi)
       return filterGames(games, q)
     } catch (error) {
       const cached = await cachedGames()

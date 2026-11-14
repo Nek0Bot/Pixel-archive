@@ -4,6 +4,10 @@ import { deleteGame, getGame, getGenres } from '../api.js'
 import useFetch from '../useFetch.js'
 import Cover from '../components/Cover.jsx'
 import State from '../components/State.jsx'
+import ConfirmModal from '../components/ConfirmModal.jsx'
+import FavoriteButton from '../components/FavoriteButton.jsx'
+import ReviewSection from '../components/ReviewSection.jsx'
+import QuoteSection from '../components/QuoteSection.jsx'
 
 export default function GameDetail() {
   const { id } = useParams()
@@ -11,10 +15,11 @@ export default function GameDetail() {
   const game = useFetch(() => getGame(id), [id])
   const genres = useFetch(getGenres, [])
   const [galat, setGalat] = useState('')
+  const [konfirmasi, setKonfirmasi] = useState(false)
   const genre = genres.data?.find((g) => g.id === game.data?.genre)
 
   async function hapus() {
-    if (!window.confirm(`Hapus "${game.data.title}" dari katalog?`)) return
+    setKonfirmasi(false)
     try {
       await deleteGame(id)
       navigate('/', { replace: true })
@@ -30,7 +35,10 @@ export default function GameDetail() {
         {game.data && (
           <article>
             <Cover game={game.data} warna={genre?.warna} besar />
-            <h1 className="judul">{game.data.title}</h1>
+            <div className="judul-baris">
+              <h1 className="judul">{game.data.title}</h1>
+              <FavoriteButton gameId={game.data.id} className="besar" />
+            </div>
             <p className="rating besar">★ {game.data.rating.toFixed(1)} dari 5</p>
             <p className="deskripsi">{game.data.description}</p>
             <dl className="info">
@@ -43,8 +51,18 @@ export default function GameDetail() {
             {galat && <p className="state galat">{galat}</p>}
             <div className="aksi">
               <Link to={`/game/${id}/edit`} className="tombol">Ubah</Link>
-              <button className="tombol bahaya" onClick={hapus}>Hapus</button>
+              <button className="tombol bahaya" onClick={() => setKonfirmasi(true)}>Hapus</button>
             </div>
+            <QuoteSection gameId={game.data.id} />
+            <ReviewSection gameId={game.data.id} />
+            <ConfirmModal
+              open={konfirmasi}
+              judul="Hapus game?"
+              pesan={`"${game.data.title}" beserta review dan quote-nya akan dihapus dari katalog.`}
+              labelYa="Hapus"
+              onYa={hapus}
+              onBatal={() => setKonfirmasi(false)}
+            />
           </article>
         )}
       </State>

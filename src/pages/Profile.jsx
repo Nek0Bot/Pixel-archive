@@ -1,19 +1,41 @@
+import { useState } from 'react'
+import useFavorites from '../hooks/useFavorites.js'
+import { getUser, saveUser } from '../services/userService.js'
+
 export default function Profile() {
+  const { ids } = useFavorites()
+  const [nama, setNama] = useState(getUser().name)
+  const [tersimpan, setTersimpan] = useState(false)
+
+  function simpan(e) {
+    e.preventDefault()
+    saveUser({ name: nama.trim() })
+    setTersimpan(true)
+  }
+
   return (
     <section>
       <h1 className="judul">Tentang Aplikasi</h1>
       <div className="kartu-profil">
         <div className="avatar">🕹️</div>
         <h2>Pixel Archive</h2>
-        <p>Katalog game indie dan retro. Telusuri game berdasarkan judul atau genre, lalu buka detailnya.</p>
+        <p>Katalog game indie dan retro. Telusuri berdasarkan judul atau genre, simpan favorit, tulis review, dan catat quote atau momen favoritmu.</p>
       </div>
       <dl className="info">
-        <dt>Versi</dt><dd>1.0.0</dd>
-        <dt>Teknologi</dt><dd>React, Vite, PWA, Express API, PostgreSQL (Supabase)</dd>
+        <dt>Versi</dt><dd>1.1.0</dd>
+        <dt>Teknologi</dt><dd>React, Vite, PWA (service worker manual), Supabase (PostgreSQL + Storage), IndexedDB (Dexie)</dd>
         <dt>Mata kuliah</dt><dd>Praktikum PPB Ganjil 2026</dd>
         <dt>Pembuat</dt><dd>Andhika Dhuta Pratama</dd>
         <dt>NIM</dt><dd>21120124130094</dd>
+        <dt>Favorit</dt><dd>{ids.length} game</dd>
       </dl>
+      <form className="form" onSubmit={simpan}>
+        <label>Nama panggilan untuk review
+          <input value={nama} onChange={(e) => { setNama(e.target.value); setTersimpan(false) }} maxLength={40} placeholder="Anonim" />
+        </label>
+        <button className="tombol" type="submit">Simpan nama</button>
+        {tersimpan && <p className="catatan" role="status">Nama tersimpan di perangkat ini.</p>}
+      </form>
     </section>
   )
 }
