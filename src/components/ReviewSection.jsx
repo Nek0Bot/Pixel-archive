@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useReviews } from '../hooks/useReviews.js'
 import { getUser, saveUser } from '../services/userService.js'
 
 const bintang = (n) => '★'.repeat(n) + '☆'.repeat(5 - n)
 
-export default function ReviewSection({ gameId }) {
+export default function ReviewSection({ gameId, onRata }) {
   const user = getUser()
   const { items, loading, error, aktif, tambah, hapus } = useReviews(gameId)
   const [nama, setNama] = useState(user.name)
@@ -13,6 +13,9 @@ export default function ReviewSection({ gameId }) {
   const [galat, setGalat] = useState('')
   const [kirim, setKirim] = useState(false)
   const rata = items.length ? (items.reduce((a, r) => a + r.rating, 0) / items.length).toFixed(1) : null
+
+  // Kabarkan rata-rata terbaru agar rating di bagian atas halaman ikut berubah
+  useEffect(() => { if (aktif && !loading && !error && onRata) onRata(rata ? Number(rata) : 0) }, [rata, aktif, loading, error, onRata])
 
   async function submit(e) {
     e.preventDefault()

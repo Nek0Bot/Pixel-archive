@@ -9,7 +9,7 @@ import State from '../components/State.jsx'
 const URUTAN = {
   terbaru: (a, b) => b.id - a.id,
   judul: (a, b) => a.title.localeCompare(b.title, 'id'),
-  rating: (a, b) => b.rating - a.rating,
+  rating: (a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0),
   tahun: (a, b) => b.year - a.year
 }
 

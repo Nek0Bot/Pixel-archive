@@ -7,7 +7,7 @@ import { clearDraft, loadDraft, saveDraft } from '../services/draftStorage.js'
 
 const KOSONG = {
   title: '', genre: '', year: new Date().getFullYear(), developer: '',
-  rating: 4, platform: '', emoji: '🎮', description: '', image_url: ''
+  platform: '', emoji: '🎮', description: '', image_url: ''
 }
 
 export default function GameForm() {
@@ -65,6 +65,7 @@ export default function GameForm() {
       {pakaiDraf && (
         <p className="catatan">Draf sebelumnya dipulihkan. <button type="button" className="tautan" onClick={buangDraf}>Buang draf</button></p>
       )}
+      <p className="catatan">Rating dihitung otomatis dari review pengguna setelah game disimpan.</p>
       <form className="form" onSubmit={kirim}>
         <label>Judul
           <input name="title" value={form.title} onChange={ubah} required />
@@ -75,14 +76,9 @@ export default function GameForm() {
             {genres.data?.map((g) => <option key={g.id} value={g.id}>{g.nama}</option>)}
           </select>
         </label>
-        <div className="dua">
-          <label>Tahun rilis
-            <input name="year" type="number" value={form.year} onChange={ubah} required />
-          </label>
-          <label>Rating (0-5)
-            <input name="rating" type="number" step="0.1" min="0" max="5" value={form.rating} onChange={ubah} required />
-          </label>
-        </div>
+        <label>Tahun rilis
+          <input name="year" type="number" value={form.year} onChange={ubah} required />
+        </label>
         <label>Pengembang
           <input name="developer" value={form.developer} onChange={ubah} required />
         </label>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { labelRating } from '../lib/rating.js'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { deleteGame, getGame, getGenres } from '../api.js'
 import useFetch from '../useFetch.js'
@@ -16,6 +17,7 @@ export default function GameDetail() {
   const genres = useFetch(getGenres, [])
   const [galat, setGalat] = useState('')
   const [konfirmasi, setKonfirmasi] = useState(false)
+  const [ringkas, setRingkas] = useState(null) // rata-rata terbaru dari ReviewSection
   const genre = genres.data?.find((g) => g.id === game.data?.genre)
 
   async function hapus() {
@@ -39,7 +41,7 @@ export default function GameDetail() {
               <h1 className="judul">{game.data.title}</h1>
               <FavoriteButton gameId={game.data.id} className="besar" />
             </div>
-            <p className="rating besar">★ {game.data.rating.toFixed(1)} dari 5</p>
+            <p className="rating besar">{labelRating({ rating: ringkas ?? game.data.rating })}{Number(ringkas ?? game.data.rating) > 0 && ' dari 5'}</p>
             <p className="deskripsi">{game.data.description}</p>
             <dl className="info">
               <dt>Pengembang</dt><dd>{game.data.developer}</dd>
@@ -54,7 +56,7 @@ export default function GameDetail() {
               <button className="tombol bahaya" onClick={() => setKonfirmasi(true)}>Hapus</button>
             </div>
             <QuoteSection gameId={game.data.id} />
-            <ReviewSection gameId={game.data.id} />
+            <ReviewSection gameId={game.data.id} onRata={setRingkas} />
             <ConfirmModal
               open={konfirmasi}
               judul="Hapus game?"

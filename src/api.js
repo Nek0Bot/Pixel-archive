@@ -9,11 +9,13 @@ const networkError = (error) =>
 
 const fromRow = (row) => ({ ...row, year: Number(row.year), rating: Number(row.rating), genre: row.genre_id })
 // Hanya kolom tabel games yang dikirim ke Supabase (field lokal seperti _syncedId dibuang)
+// rating tidak dikirim: nilainya dihitung otomatis dari review oleh trigger database
 const KOLOM = ['title', 'developer', 'platform', 'emoji', 'description', 'image_url']
 const toRow = (game) => {
-  const row = { genre_id: String(game.genre), year: Number(game.year), rating: Number(game.rating) }
+  const row = { genre_id: String(game.genre), year: Number(game.year) }
   for (const k of KOLOM) row[k] = game[k] ?? null
   row.image_url = row.image_url || null
+  row.emoji = row.emoji || '🎮'
   return row
 }
 const localId = () => -(Date.now() + Math.floor(Math.random() * 10000))
@@ -155,7 +157,7 @@ async function addMutation(mutation) {
 }
 
 export async function createGame(body) {
-  const payload = { ...body, year: Number(body.year), rating: Number(body.rating), genre: String(body.genre) }
+  const payload = { ...body, year: Number(body.year), genre: String(body.genre) }
   if (online() && supabaseConfigured) {
     try {
       const { data, error } = await requireSupabase()
@@ -172,7 +174,7 @@ export async function createGame(body) {
   }
 
   const id = localId()
-  const game = { ...payload, id, _pending: true }
+  const game = { ...payload, id, rating: 0, _pending: true }
   await db.games.put(game)
   await addMutation({ type: 'create', localId: id, payload })
   return game
@@ -180,7 +182,7 @@ export async function createGame(body) {
 
 export async function updateGame(id, body) {
   const numericId = Number(id)
-  const payload = { ...body, year: Number(body.year), rating: Number(body.rating), genre: String(body.genre) }
+  const payload = { ...body, year: Number(body.year), genre: String(body.genre) }
 
   if (numericId < 0) {
     const alias = await db.games.get(numericId)
