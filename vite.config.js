@@ -17,7 +17,7 @@ export default defineConfig({
       manifest: {
         name: 'Pixel Archive',
         short_name: 'Pixel Archive',
-        description: 'Katalog game oleh gamer',
+        description: 'Katalog game indie dan retro',
         theme_color: '#1B1F3B',
         background_color: '#EEF0F6',
         display: 'standalone',
