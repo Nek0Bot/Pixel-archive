@@ -160,10 +160,9 @@ a { color: inherit; }
 
 .pwa-badge { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 14px; font-size: .85rem; font-weight: 600; background: linear-gradient(90deg, #FDE9B8, #FAD2E3); border-bottom: 2px solid var(--line); }
 
-/* Cover mengikuti bentuk asli gambar (tidak dipaksa rasio tetap). Gradasi tampil sebagai latar bila gambar dibatasi tinggi maksimal. */
-.cover.ada-gambar, .cover.besar.ada-gambar { height: auto; display: block; }
-.cover.ada-gambar img { width: 100%; height: auto; max-height: 280px; object-fit: contain; display: block; margin: 0 auto; }
-.cover.besar.ada-gambar img { max-height: 70vh; }
+/* Cover mengikuti ukuran asli gambar: tanpa tinggi tetap, tanpa batas tinggi, tanpa ruang sisa */
+.cover.ada-gambar, .cover.besar.ada-gambar { height: auto; display: block; line-height: 0; }
+.cover.ada-gambar img { display: block; width: 100%; height: auto; max-height: none; }
 .grid { align-items: start; }
 
 /* Pop up form review dan quote */
