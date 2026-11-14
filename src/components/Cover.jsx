@@ -6,7 +6,7 @@ export default function Cover({ game, warna = '#5B7FE8', besar = false }) {
   const adaGambar = game.image_url && !rusak
 
   return (
-    <div className={`cover ${besar ? 'besar' : ''}`} style={{ '--warna': warna }}>
+    <div className={`cover ${besar ? 'besar' : ''} ${adaGambar ? 'ada-gambar' : ''}`} style={{ '--warna': warna }}>
       {adaGambar ? (
         <img src={game.image_url} alt={`Cover ${game.title}`} loading="lazy" onError={() => setRusak(true)} />
       ) : (

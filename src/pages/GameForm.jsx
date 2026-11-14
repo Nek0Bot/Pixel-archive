@@ -75,6 +75,10 @@ export default function GameForm() {
             <option value="">Pilih genre</option>
             {genres.data?.map((g) => <option key={g.id} value={g.id}>{g.nama}</option>)}
           </select>
+          {genres.error && <span className="state galat">Genre gagal dimuat: {genres.error}</span>}
+          {!genres.loading && !genres.error && genres.data?.length === 0 && (
+            <span className="state galat">Daftar genre kosong. Periksa data tabel genres dan policy SELECT-nya di Supabase.</span>
+          )}
         </label>
         <label>Tahun rilis
           <input name="year" type="number" value={form.year} onChange={ubah} required />
