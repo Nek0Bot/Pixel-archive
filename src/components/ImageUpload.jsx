@@ -35,7 +35,7 @@ export default function ImageUpload({ value, onChange }) {
         </div>
       )}
       <label className="berkas">
-        {naik ? 'Mengunggah...' : 'Pilih gambar (JPG, PNG, WebP, maks 2 MB)'}
+        {naik ? 'Mengunggah...' : 'Pilih gambar (JPG, PNG, WebP, maks 4 MB)'}
         <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pilih} disabled={!online || naik} />
       </label>
       {!online && <p className="catatan">Offline: upload tidak tersedia. Kamu bisa menyimpan tanpa gambar atau memakai URL.</p>}

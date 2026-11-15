@@ -172,11 +172,11 @@ a { color: inherit; }
 .cover.besar.ada-gambar img { display: block; width: auto; max-width: 100%; height: auto; }
 .cover.besar:not(.ada-gambar) { aspect-ratio: 4 / 3; width: 100%; max-width: max(50%, 180px); }
 
-/* Halaman detail: banner di kiri, informasi di kanan pada layar lebar atau ponsel landscape */
-.detail-banner { margin: 8px 0 16px; }
+/* Halaman detail: banner selalu di tengah; di layar lebar berada di kiri dan rata tengah secara vertikal terhadap informasi */
+.detail-banner { display: flex; justify-content: center; margin: 8px 0 16px; }
 @media (min-width: 640px) {
-  .detail-grid { display: grid; grid-template-columns: minmax(200px, 300px) 1fr; gap: 24px; align-items: start; }
-  .detail-banner { position: sticky; top: 12px; margin: 8px 0 0; }
+  .detail-grid { display: grid; grid-template-columns: minmax(200px, 300px) 1fr; gap: 24px; align-items: center; }
+  .detail-banner { margin: 8px 0; }
   .cover.besar.ada-gambar, .cover.besar:not(.ada-gambar) { max-width: 100%; }
 }
 

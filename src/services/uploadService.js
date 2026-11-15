@@ -2,11 +2,11 @@ import { clientOnline } from './supabaseGuard.js'
 
 export const BUCKET = 'game-images'
 const TIPE = ['image/jpeg', 'image/png', 'image/webp']
-const MAKS = 2 * 1024 * 1024 // 2 MB
+const MAKS = 4 * 1024 * 1024 // 4 MB
 
 export function validasiGambar(file) {
   if (!TIPE.includes(file.type)) return 'Format harus JPG, PNG, atau WebP.'
-  if (file.size > MAKS) return 'Ukuran gambar maksimal 2 MB.'
+  if (file.size > MAKS) return 'Ukuran gambar maksimal 4 MB.'
   return ''
 }
 
