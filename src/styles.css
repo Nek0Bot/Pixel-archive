@@ -160,10 +160,25 @@ a { color: inherit; }
 
 .pwa-badge { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 14px; font-size: .85rem; font-weight: 600; background: linear-gradient(90deg, #FDE9B8, #FAD2E3); border-bottom: 2px solid var(--line); }
 
-/* Cover mengikuti ukuran asli gambar: tanpa tinggi tetap, tanpa batas tinggi, tanpa ruang sisa */
-.cover.ada-gambar, .cover.besar.ada-gambar { height: auto; display: block; line-height: 0; }
-.cover.ada-gambar img { display: block; width: 100%; height: auto; max-height: none; }
-.grid { align-items: start; }
+/* Banner kartu (dashboard): ukuran seragam */
+.cover:not(.besar) { aspect-ratio: 4 / 3; height: auto; }
+.cover:not(.besar) img { width: 100%; height: 100%; object-fit: cover; }
+.grid { align-items: stretch; }
+.kartu-wrap, .game-card { height: 100%; }
+
+/* Banner detail: bingkai mengikuti bentuk gambar, ukurannya setengah dari sebelumnya, tidak diperbesar melebihi ukuran aslinya */
+.cover.besar { height: auto; margin: 0; }
+.cover.besar.ada-gambar { display: block; line-height: 0; width: fit-content; max-width: max(50%, 180px); }
+.cover.besar.ada-gambar img { display: block; width: auto; max-width: 100%; height: auto; }
+.cover.besar:not(.ada-gambar) { aspect-ratio: 4 / 3; width: 100%; max-width: max(50%, 180px); }
+
+/* Halaman detail: banner di kiri, informasi di kanan pada layar lebar atau ponsel landscape */
+.detail-banner { margin: 8px 0 16px; }
+@media (min-width: 640px) {
+  .detail-grid { display: grid; grid-template-columns: minmax(200px, 300px) 1fr; gap: 24px; align-items: start; }
+  .detail-banner { position: sticky; top: 12px; margin: 8px 0 0; }
+  .cover.besar.ada-gambar, .cover.besar:not(.ada-gambar) { max-width: 100%; }
+}
 
 /* Pop up form review dan quote */
 .blok-kepala { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }

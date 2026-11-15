@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getActivity } from '../services/activityService.js'
 import useFetch from '../useFetch.js'
+import usePersistedState from '../hooks/usePersistedState.js'
 import State from '../components/State.jsx'
 
 const JENIS = {
@@ -29,7 +30,7 @@ function waktu(iso) {
 }
 
 export default function Activity() {
-  const [filter, setFilter] = useState('')
+  const [filter, setFilter] = usePersistedState('pa_aktivitas_filter', '')
   const [versi, setVersi] = useState(0)
   const { data, loading, error } = useFetch(() => getActivity(), [versi])
   const items = (data?.items || []).filter((a) => !filter || a.kind.startsWith(filter))

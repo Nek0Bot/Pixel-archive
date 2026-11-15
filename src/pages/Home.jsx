@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { getGames, getGenres } from '../api.js'
 import useFetch from '../useFetch.js'
+import usePersistedState from '../hooks/usePersistedState.js'
+import useScrollRestore from '../hooks/useScrollRestore.js'
 import GameCard from '../components/GameCard.jsx'
 import GenreFilter from '../components/GenreFilter.jsx'
 import State from '../components/State.jsx'
@@ -14,11 +16,12 @@ const URUTAN = {
 }
 
 export default function Home() {
-  const [q, setQ] = useState('')
-  const [genre, setGenre] = useState('')
-  const [urutan, setUrutan] = useState('terbaru')
+  const [q, setQ] = usePersistedState('pa_home_q', '')
+  const [genre, setGenre] = usePersistedState('pa_home_genre', '')
+  const [urutan, setUrutan] = usePersistedState('pa_home_urutan', 'terbaru')
   const games = useFetch(() => getGames(q), [q])
   const genres = useFetch(getGenres, [])
+  useScrollRestore('pa_home_scroll', !games.loading)
   const warna = (id) => genres.data?.find((g) => g.id === id)?.warna || '#5B7FE8'
 
   const tampil = useMemo(() => {
