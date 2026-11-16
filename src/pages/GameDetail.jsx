@@ -41,27 +41,24 @@ export default function GameDetail() {
                 <Cover game={game.data} warna={genre?.warna} besar />
               </div>
               <div className="detail-isi">
-                <div className="judul-baris">
-                  <h1 className="judul">{game.data.title}</h1>
-                  <FavoriteButton gameId={game.data.id} className="besar" />
-                </div>
-                <p className="rating besar">
-                  {labelRating({ rating: ringkas ?? game.data.rating })}
-                  {Number(ringkas ?? game.data.rating) > 0 && ' dari 5'}
-                </p>
-                <p className="deskripsi">{game.data.description}</p>
-                <dl className="info">
-                  <dt>Pengembang</dt><dd>{game.data.developer}</dd>
-                  <dt>Rilis</dt><dd>{game.data.year}</dd>
-                  <dt>Platform</dt><dd>{game.data.platform}</dd>
-                  <dt>Genre</dt>
-                  <dd>{genre ? <Link to={`/genre/${genre.id}`}>{genre.nama}</Link> : game.data.genre}</dd>
-                </dl>
-                {galat && <p className="state galat">{galat}</p>}
-                <div className="aksi">
-                  <Link to={`/game/${id}/edit`} className="tombol">Ubah</Link>
-                  <button className="tombol bahaya" onClick={() => setKonfirmasi(true)}>Hapus</button>
-                </div>
+            <div className="judul-baris">
+              <h1 className="judul">{game.data.title}</h1>
+              <FavoriteButton gameId={game.data.id} className="besar" />
+            </div>
+            <p className="rating besar">{labelRating({ rating: ringkas ?? game.data.rating })}{Number(ringkas ?? game.data.rating) > 0 && ' dari 5'}</p>
+            <p className="deskripsi">{game.data.description}</p>
+            <dl className="info">
+              <dt>Pengembang</dt><dd>{game.data.developer}</dd>
+              <dt>Rilis</dt><dd>{game.data.year}</dd>
+              <dt>Platform</dt><dd>{game.data.platform}</dd>
+              <dt>Genre</dt>
+              <dd>{genre ? <Link to={`/genre/${genre.id}`}>{genre.nama}</Link> : game.data.genre}</dd>
+            </dl>
+            {galat && <p className="state galat">{galat}</p>}
+            <div className="aksi">
+              <Link to={`/game/${id}/edit`} className="tombol">Ubah</Link>
+              <button className="tombol bahaya" onClick={() => setKonfirmasi(true)}>Hapus</button>
+            </div>
               </div>
             </div>
             <QuoteSection gameId={game.data.id} />

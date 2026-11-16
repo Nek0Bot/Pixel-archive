@@ -19,10 +19,10 @@ export default function Profile() {
       <div className="kartu-profil">
         <div className="avatar">🕹️</div>
         <h2>Pixel Archive</h2>
-        <p>Katalog game indie dan retro. Telusuri berdasarkan judul atau genre, simpan favorit, tulis review, dan catat quote atau momen favoritmu.</p>
+        <p>Katalog game oleh para gamer. Telusuri berdasarkan judul atau genre, simpan favorit, tulis review, dan catat quote atau momen favoritmu.</p>
       </div>
       <dl className="info">
-        <dt>Versi</dt><dd>1.1.0</dd>
+        <dt>Versi</dt><dd>{__APP_VERSION__}</dd>
         <dt>Teknologi</dt><dd>React, Vite, PWA (service worker manual), Supabase (PostgreSQL + Storage), IndexedDB (Dexie)</dd>
         <dt>Mata kuliah</dt><dd>Praktikum PPB Ganjil 2026</dd>
         <dt>Pembuat</dt><dd>Andhika Dhuta Pratama</dd>

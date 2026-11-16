@@ -35,7 +35,7 @@ export default function Home() {
         <h1 className="judul">Pixel Archive</h1>
         <Link to="/game/baru" className="tombol">+ Tambah game</Link>
       </div>
-      <p className="sub">Katalog game indie dan retro yang layak dimainkan.</p>
+      <p className="sub">Katalog game oleh para gamer. Cari, beri review, dan simpan favoritmu.</p>
       <input
         className="cari"
         type="search"

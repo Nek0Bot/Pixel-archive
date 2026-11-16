@@ -36,7 +36,7 @@ function bacaGame(body) {
 }
 
 app.get('/api', (req, res) =>
-  res.json({ nama: 'Arsip Piksel API', endpoints: ['GET/POST /api/games', 'GET/PUT/DELETE /api/games/:id', 'GET /api/genres', 'GET /api/genres/:id'] })
+  res.json({ nama: 'Pixel Archive API', endpoints: ['GET/POST /api/games', 'GET/PUT/DELETE /api/games/:id', 'GET /api/genres', 'GET /api/genres/:id'] })
 )
 
 app.get('/api/games', h(async (req, res) => {

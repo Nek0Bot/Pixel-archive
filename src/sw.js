@@ -2,7 +2,8 @@
 // Service worker manual (Modul 4), tanpa library Workbox.
 // Daftar file hasil build disuntikkan oleh vite-plugin-pwa pada self.__WB_MANIFEST.
 
-const VERSI = 'v2'
+// Naikkan nilai ini setiap rilis agar cache lama dibersihkan (samakan dengan versi di package.json)
+const VERSI = '1.2.2'
 const CACHE_SHELL = `pixel-shell-${VERSI}`
 const CACHE_RUNTIME = `pixel-runtime-${VERSI}`
 const BATAS_RUNTIME = 120
