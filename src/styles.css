@@ -238,3 +238,29 @@ a.item.aktivitas:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(
 .aktivitas-ikon { font-size: 1.3rem; line-height: 1.2; }
 .aktivitas-teks { display: grid; gap: 2px; }
 .aktivitas-teks small { color: var(--muted); }
+
+/* ===== Layout desktop: memanfaatkan lebar layar ===== */
+@media (min-width: 900px) {
+  .app { max-width: 1100px; }
+  .main { padding: 28px 32px calc(100px + env(safe-area-inset-bottom)); }
+  .judul { font-size: 2.4rem; }
+  .grid { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+  .filter { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .filter .pills { margin: 0; flex: 1; }
+  .cari { max-width: 520px; }
+  .daftar { grid-template-columns: repeat(2, 1fr); }
+  .main > section > .daftar-kecil { grid-template-columns: repeat(2, 1fr); }
+  .main > section > form.form { max-width: 760px; }
+  .detail-grid { grid-template-columns: minmax(260px, 340px) 1fr; gap: 36px; }
+  .detail-bawah { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; align-items: start; margin-top: 32px; }
+  .detail-bawah .blok { margin-top: 0; }
+  .halaman-profil { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; align-items: start; }
+  .halaman-profil > h1, .halaman-profil > form { grid-column: 1 / -1; }
+  .main > section.halaman-profil > form.form { max-width: 520px; }
+  .halaman-profil .kartu-profil { margin-bottom: 0; }
+  .halaman-profil .info { margin-top: 0; }
+}
+@media (min-width: 1280px) {
+  .app { max-width: 1280px; }
+  .grid { grid-template-columns: repeat(5, 1fr); }
+}

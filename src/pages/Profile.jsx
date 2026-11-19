@@ -14,7 +14,7 @@ export default function Profile() {
   }
 
   return (
-    <section>
+    <section className="halaman-profil">
       <h1 className="judul">Tentang Aplikasi</h1>
       <div className="kartu-profil">
         <div className="avatar">🕹️</div>

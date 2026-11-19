@@ -61,8 +61,10 @@ export default function GameDetail() {
             </div>
               </div>
             </div>
-            <QuoteSection gameId={game.data.id} />
-            <ReviewSection gameId={game.data.id} onRata={setRingkas} />
+                      <div className="detail-bawah">
+              <QuoteSection gameId={game.data.id} />
+              <ReviewSection gameId={game.data.id} onRata={setRingkas} />
+            </div>
             <ConfirmModal
               open={konfirmasi}
               judul="Hapus game?"
