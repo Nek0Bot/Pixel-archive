@@ -7,6 +7,33 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+import { pool, testDatabase } from './db.js'
+
+// Database health check
+app.get('/api/health/db', async (req, res) => {
+  try {
+    const result = await testDatabase()
+
+    res.json({
+      status: 'connected',
+      database: 'PostgreSQL',
+      time: result.database_time
+    })
+  } catch (err) {
+    console.error('[DB Health Check]', {
+      code: err.code,
+      message: err.message
+    })
+
+    res.status(503).json({
+      status: 'disconnected',
+      message: 'Database connection failed',
+      code: err.code || 'UNKNOWN'
+    })
+  }
+})
+
+
 const SELECT_GAME = `SELECT id, title, genre_id AS genre, year, developer, rating::float AS rating,
   platform, emoji, description, image_url FROM games`
 
