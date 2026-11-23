@@ -2,7 +2,7 @@
 
 Katalog game oleh para gamer. Telusuri game berdasarkan judul atau genre, simpan favorit, tulis review, catat quote atau momen, dan lihat aktivitas terbaru. Aplikasi berbentuk PWA yang bisa dipasang dan tetap berjalan saat offline.
 
-Versi saat ini: **1.2.2** (lihat [CHANGELOG.md](CHANGELOG.md)).
+Versi saat ini: **1.3.0** (lihat [CHANGELOG.md](CHANGELOG.md)).
 Proyek Tugas Akhir Praktikum PPB Ganjil 2026.
 
 ## Fitur
@@ -13,35 +13,38 @@ Proyek Tugas Akhir Praktikum PPB Ganjil 2026.
 - PWA: service worker manual, bisa dipasang, cache data dan antrean perubahan offline (IndexedDB)
 
 ## Teknologi
-React 18, Vite, React Router, Supabase (PostgreSQL, Storage), Dexie (IndexedDB), vite-plugin-pwa (manifest dan injeksi daftar file), service worker manual di `src/sw.js`.
+React 18, Vite, React Router, Express API (`api/`), Supabase (PostgreSQL, Storage), Dexie (IndexedDB), vite-plugin-pwa (manifest dan injeksi daftar file), service worker manual di `src/sw.js`.
 
 ## Struktur folder
 ```
 src/
   pages/         halaman (Home, GameDetail, GameForm, Genres, GenreDetail, Favorites, Activity, Profile)
   components/    komponen UI (Cover, GameCard, GenreFilter, ReviewSection, QuoteSection, FormModal, ...)
-  services/      akses data ke Supabase (review, quote, upload, aktivitas) dan localStorage (favorit, user, draf)
+  http.js        pembungkus fetch ke Express API (/api)
+  services/      akses data lewat Express API (review, quote, upload, aktivitas) dan localStorage (favorit, user, draf)
   hooks/         custom hooks (useFavorites, useReviews, useQuotes, useTheme, usePersistedState, ...)
   offline/       database lokal Dexie dan antrean sinkronisasi
-  lib/           klien Supabase dan helper rating
+  lib/           helper rating
   sw.js          service worker manual
 supabase/        file SQL bernomor (jalankan berurutan)
-api/, server.js  API Express lama (opsional, tidak dipakai frontend)
+api/, server.js  API Express (games, genres, reviews, quotes, aktivitas, upload); satu-satunya akses frontend ke database
 ```
 
 ## Menjalankan
 ```
 npm install
 ```
-Buat file `.env` di root (jangan di-commit):
+Buat file `.env` di root (jangan di-commit, contoh ada di `.env.example`):
 ```
-VITE_SUPABASE_URL=https://PROJECT_ID.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+DATABASE_URL=postgresql://postgres.PROJECT_ID:PASSWORD@aws-0-REGION.pooler.supabase.com:5432/postgres
+SUPABASE_URL=https://PROJECT_ID.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=...
 ```
+Semua variabel ini hanya dibaca server Express. Frontend tidak memerlukan variabel `VITE_SUPABASE_*` lagi.
 ```
-npm run dev       # mode pengembangan (service worker tidak aktif)
+npm run dev       # Express (port 3001) dan Vite berjalan bersamaan; /api diproxy ke Express
 npm run build     # build produksi
-npm run preview   # uji build produksi, termasuk PWA dan offline
+npm run preview   # uji build produksi (jalankan juga `npm run api` di terminal lain)
 ```
 Service worker hanya aktif pada build produksi, jadi uji PWA dengan `build` lalu `preview`.
 
@@ -59,8 +62,8 @@ Jalankan file di folder `supabase/` pada SQL Editor secara berurutan:
 
 ## Deploy (Vercel)
 1. Push ke GitHub dan import repository di Vercel.
-2. Tambahkan environment variable `VITE_SUPABASE_URL` dan `VITE_SUPABASE_PUBLISHABLE_KEY`.
-3. Deploy ulang setiap kali variabel berubah (nilainya ditanam saat build).
+2. Tambahkan environment variable `DATABASE_URL`, `SUPABASE_URL`, dan `SUPABASE_SERVICE_ROLE_KEY`.
+3. `api/index.js` berjalan sebagai Serverless Function dan `vercel.json` mengarahkan `/api/*` ke sana.
 
 ## Catatan keamanan
-Aplikasi tidak memakai login, sehingga policy RLS memberi akses baca dan tulis kepada role `anon`. Ini sesuai untuk tugas atau demo, bukan untuk produksi. Untuk produksi gunakan Supabase Auth dengan policy per pengguna. Jangan pernah memasukkan `service_role` key ke frontend atau repository.
+Aplikasi tidak memakai login, sehingga policy RLS memberi akses baca dan tulis kepada role `anon`. Ini sesuai untuk tugas atau demo, bukan untuk produksi. Untuk produksi gunakan Supabase Auth dengan policy per pengguna. `service_role` key hanya boleh ada di environment server (Vercel/`.env`), jangan pernah di frontend atau repository.

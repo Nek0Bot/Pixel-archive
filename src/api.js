@@ -1,5 +1,5 @@
 import { db, notifyQueueChanged } from './offline/db.js'
-import { requireSupabase, supabase, supabaseConfigured } from './lib/supabase.js'
+import { http } from './http.js'
 
 const online = () => typeof navigator === 'undefined' || navigator.onLine
 const networkError = (error) =>
@@ -7,16 +7,17 @@ const networkError = (error) =>
   error instanceof TypeError ||
   /failed to fetch|networkerror|load failed|fetch failed/i.test(String(error?.message || ''))
 
-const fromRow = (row) => ({ ...row, year: Number(row.year), rating: Number(row.rating), genre: row.genre_id })
-// Hanya kolom tabel games yang dikirim ke Supabase (field lokal seperti _syncedId dibuang)
+// Express API sudah mengembalikan field `genre`, `year`, dan `rating` dalam bentuk yang dipakai UI
+const fromRow = (row) => ({ ...row, year: Number(row.year), rating: Number(row.rating), genre: row.genre ?? row.genre_id })
+// Hanya field milik game yang dikirim ke API (field lokal seperti _syncedId dibuang)
 // rating tidak dikirim: nilainya dihitung otomatis dari review oleh trigger database
 const KOLOM = ['title', 'developer', 'platform', 'emoji', 'description', 'image_url']
-const toRow = (game) => {
-  const row = { genre_id: String(game.genre), year: Number(game.year) }
-  for (const k of KOLOM) row[k] = game[k] ?? null
-  row.image_url = row.image_url || null
-  row.emoji = row.emoji || '🎮'
-  return row
+const toBody = (game) => {
+  const body = { genre: String(game.genre), year: Number(game.year) }
+  for (const k of KOLOM) body[k] = game[k] ?? null
+  body.image_url = body.image_url || null
+  body.emoji = body.emoji || '🎮'
+  return body
 }
 const localId = () => -(Date.now() + Math.floor(Math.random() * 10000))
 
@@ -47,11 +48,9 @@ function filterGames(games, q = '') {
 }
 
 export async function getGames(q = '') {
-  if (online() && supabaseConfigured) {
+  if (online()) {
     try {
-      const { data, error } = await requireSupabase()
-        .from('games').select('*').order('id', { ascending: true })
-      if (error) throw error
+      const data = await http('/games')
       const games = (data || []).map(fromRow)
       await db.games.bulkPut(games)
       // Buang cache game yang sudah dihapus di server (kecuali data lokal yang belum sinkron)
@@ -66,26 +65,20 @@ export async function getGames(q = '') {
     }
   }
   const cached = await cachedGames()
-  if (!cached.length && !supabaseConfigured) {
-    throw new Error('Supabase belum dikonfigurasi dan belum ada data tersimpan di perangkat.')
-  }
+  if (!cached.length) throw new Error('Belum ada data tersimpan di perangkat. Buka aplikasi saat online terlebih dahulu.')
   return filterGames(cached, q)
 }
 
 export async function getGame(id) {
   const numericId = Number(id)
-  if (numericId < 0 || !online() || !supabaseConfigured) {
+  if (numericId < 0 || !online()) {
     const cached = await db.games.get(numericId)
     if (cached) return cached
     throw new Error('Game belum tersedia di penyimpanan perangkat. Buka aplikasi saat online terlebih dahulu.')
   }
 
   try {
-    const { data, error } = await requireSupabase()
-      .from('games').select('*').eq('id', numericId).maybeSingle()
-    if (error) throw error
-    if (!data) throw new Error('Game tidak ditemukan.')
-    const game = fromRow(data)
+    const game = fromRow(await http(`/games/${numericId}`))
     await db.games.put(game)
     return game
   } catch (error) {
@@ -96,18 +89,9 @@ export async function getGame(id) {
 }
 
 export async function getGenres() {
-  if (online() && supabaseConfigured) {
+  if (online()) {
     try {
-      const client = requireSupabase()
-      const [{ data: genres, error: genreError }, { data: games, error: gameError }] = await Promise.all([
-        client.from('genres').select('*').order('nama'),
-        client.from('games').select('id, genre_id')
-      ])
-      if (genreError) throw genreError
-      if (gameError) throw gameError
-      const counts = new Map()
-      for (const game of games || []) counts.set(game.genre_id, (counts.get(game.genre_id) || 0) + 1)
-      const result = (genres || []).map((genre) => ({ ...genre, jumlah: counts.get(genre.id) || 0 }))
+      const result = await http('/genres')
       await db.genres.bulkPut(result)
       return result
     } catch (error) {
@@ -122,16 +106,9 @@ export async function getGenres() {
 }
 
 export async function getGenre(id) {
-  if (online() && supabaseConfigured) {
+  if (online()) {
     try {
-      const client = requireSupabase()
-      const [{ data: genre, error: genreError }, { data: games, error: gamesError }] = await Promise.all([
-        client.from('genres').select('*').eq('id', id).maybeSingle(),
-        client.from('games').select('*').eq('genre_id', id).order('id')
-      ])
-      if (genreError) throw genreError
-      if (gamesError) throw gamesError
-      if (!genre) throw new Error('Genre tidak ditemukan.')
+      const { games, ...genre } = await http(`/genres/${encodeURIComponent(id)}`)
       const mappedGames = (games || []).map(fromRow)
       await db.genres.put(genre)
       await db.games.bulkPut(mappedGames)
@@ -158,19 +135,14 @@ async function addMutation(mutation) {
 
 export async function createGame(body) {
   const payload = { ...body, year: Number(body.year), genre: String(body.genre) }
-  if (online() && supabaseConfigured) {
+  if (online()) {
     try {
-      const { data, error } = await requireSupabase()
-        .from('games').insert(toRow(payload)).select('*').single()
-      if (error) throw error
-      const game = fromRow(data)
+      const game = fromRow(await http('/games', { method: 'POST', body: toBody(payload) }))
       await db.games.put(game)
       return game
     } catch (error) {
       if (!networkError(error)) throw error
     }
-  } else if (online() && !supabaseConfigured) {
-    throw new Error('Supabase belum dikonfigurasi. Periksa file .env sebelum menambahkan data.')
   }
 
   const id = localId()
@@ -204,20 +176,15 @@ export async function updateGame(id, body) {
     return game
   }
 
-  if (online() && supabaseConfigured) {
+  if (online()) {
     try {
-      const { data, error } = await requireSupabase()
-        .from('games').update(toRow(payload)).eq('id', numericId).select('*').single()
-      if (error) throw error
-      const game = fromRow(data)
+      const game = fromRow(await http(`/games/${numericId}`, { method: 'PUT', body: toBody(payload) }))
       await db.games.put(game)
       await updateTemporaryAliases(numericId, game)
       return game
     } catch (error) {
       if (!networkError(error)) throw error
     }
-  } else if (online() && !supabaseConfigured) {
-    throw new Error('Supabase belum dikonfigurasi. Periksa file .env sebelum mengubah data.')
   }
 
   const game = { ...payload, id: numericId, _pending: true }
@@ -242,17 +209,14 @@ export async function deleteGame(id) {
     return { message: 'Game lokal dihapus.' }
   }
 
-  if (online() && supabaseConfigured) {
+  if (online()) {
     try {
-      const { error } = await requireSupabase().from('games').delete().eq('id', numericId)
-      if (error) throw error
+      await http(`/games/${numericId}`, { method: 'DELETE' })
       await db.games.delete(numericId)
       return { message: 'Game dihapus.' }
     } catch (error) {
       if (!networkError(error)) throw error
     }
-  } else if (online() && !supabaseConfigured) {
-    throw new Error('Supabase belum dikonfigurasi. Periksa file .env sebelum menghapus data.')
   }
 
   await db.games.delete(numericId)
@@ -265,18 +229,15 @@ export async function deleteGame(id) {
 let syncing = false
 
 export async function syncPendingChanges() {
-  if (syncing || !online() || !supabaseConfigured) return
+  if (syncing || !online()) return
   syncing = true
   const idMap = new Map()
 
   try {
     const queue = await db.mutations.orderBy('queueId').toArray()
     for (const item of queue) {
-      const client = requireSupabase()
       if (item.type === 'create') {
-        const { data, error } = await client.from('games').insert(toRow(item.payload)).select('*').single()
-        if (error) throw error
-        const created = fromRow(data)
+        const created = fromRow(await http('/games', { method: 'POST', body: toBody(item.payload) }))
         idMap.set(item.localId, created.id)
         await db.games.put(created)
         await db.games.put({ ...created, id: item.localId, _syncedId: created.id })
@@ -286,16 +247,12 @@ export async function syncPendingChanges() {
         }
       } else if (item.type === 'update') {
         const realId = idMap.get(item.gameId) || item.gameId
-        const { data, error } = await client.from('games').update(toRow(item.payload))
-          .eq('id', realId).select('*').single()
-        if (error) throw error
-        const updated = fromRow(data)
+        const updated = fromRow(await http(`/games/${realId}`, { method: 'PUT', body: toBody(item.payload) }))
         await db.games.put(updated)
         await updateTemporaryAliases(realId, updated)
       } else if (item.type === 'delete') {
         const realId = idMap.get(item.gameId) || item.gameId
-        const { error } = await client.from('games').delete().eq('id', realId)
-        if (error) throw error
+        await http(`/games/${realId}`, { method: 'DELETE' })
         await db.games.delete(realId)
         const rows = await db.games.toArray()
         await db.games.bulkDelete(rows.filter((row) => row._syncedId === realId).map((row) => row.id))

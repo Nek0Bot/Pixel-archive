@@ -8,7 +8,10 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 
 export default defineConfig({
   define: { __APP_VERSION__: JSON.stringify(pkg.version) },
-  envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
+  envPrefix: ['VITE_'],
+  // Saat dev, semua permintaan /api diteruskan ke Express (node server.js, port 3001)
+  server: { proxy: { '/api': 'http://localhost:3001' } },
+  preview: { proxy: { '/api': 'http://localhost:3001' } },
   plugins: [ ... 
     react(),
     VitePWA({

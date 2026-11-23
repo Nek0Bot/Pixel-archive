@@ -1,12 +1,12 @@
-import { clientOnline, cek } from './supabaseGuard.js'
+import { http, butuhOnline } from '../http.js'
 
 const KEY = 'pixel_archive_activity_cache'
 
 // Ambil 50 aktivitas terbaru. Saat offline atau gagal, tampilkan salinan terakhir dari localStorage.
 export async function getActivity(limit = 50) {
   try {
-    const data = cek(await clientOnline().from('activity_log').select('*')
-      .order('created_at', { ascending: false }).limit(limit))
+    butuhOnline()
+    const data = await http(`/activity?limit=${limit}`)
     try { localStorage.setItem(KEY, JSON.stringify(data)) } catch { /* penyimpanan penuh */ }
     return { items: data, dariCache: false }
   } catch (err) {

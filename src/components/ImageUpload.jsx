@@ -2,7 +2,7 @@ import { useState } from 'react'
 import useOnline from '../hooks/useOnline.js'
 import { uploadGambar, validasiGambar } from '../services/uploadService.js'
 
-// Upload cover ke Supabase Storage, atau tempel URL gambar secara manual.
+// Upload cover lewat Express API (/api/upload), atau tempel URL gambar secara manual.
 export default function ImageUpload({ value, onChange }) {
   const online = useOnline()
   const [naik, setNaik] = useState(false)

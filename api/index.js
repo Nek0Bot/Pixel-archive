@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { pool } from './db.js'
+import { simpanGambar } from './storage.js'
 
 const app = express()
 app.use(cors())
@@ -19,7 +20,6 @@ function bacaGame(body) {
     genre_id: String(body.genre || '').trim(),
     year: Number(body.year),
     developer: String(body.developer || '').trim(),
-    rating: Number(body.rating),
     platform: String(body.platform || '').trim(),
     emoji: String(body.emoji || '🎮').trim().slice(0, 8),
     description: String(body.description || '').trim(),
@@ -30,13 +30,12 @@ function bacaGame(body) {
   if (!g.genre_id) galat.push('Genre wajib dipilih')
   if (!Number.isInteger(g.year) || g.year < 1970 || g.year > 2100) galat.push('Tahun rilis tidak valid')
   if (!g.developer) galat.push('Pengembang wajib diisi')
-  if (!(g.rating >= 0 && g.rating <= 5)) galat.push('Rating harus 0 sampai 5')
   if (g.image_url && !/^https?:\/\//.test(g.image_url)) galat.push('URL gambar harus diawali http:// atau https://')
   return { g, galat }
 }
 
 app.get('/api', (req, res) =>
-  res.json({ nama: 'Pixel Archive API', endpoints: ['GET/POST /api/games', 'GET/PUT/DELETE /api/games/:id', 'GET /api/genres', 'GET /api/genres/:id'] })
+  res.json({ nama: 'Pixel Archive API', endpoints: ['GET/POST /api/games', 'GET/PUT/DELETE /api/games/:id', 'GET/POST /api/games/:id/reviews', 'DELETE /api/reviews/:id', 'GET/POST /api/games/:id/quotes', 'DELETE /api/quotes/:id', 'GET /api/genres', 'GET /api/genres/:id', 'GET /api/activity', 'POST /api/upload'] })
 )
 
 app.get('/api/games', h(async (req, res) => {
@@ -59,9 +58,9 @@ app.post('/api/games', h(async (req, res) => {
   const { g, galat } = bacaGame(req.body)
   if (galat.length) return res.status(400).json({ message: galat.join('. ') })
   const { rows } = await pool.query(
-    `INSERT INTO games (title, genre_id, year, developer, rating, platform, emoji, description, image_url)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
-    [g.title, g.genre_id, g.year, g.developer, g.rating, g.platform, g.emoji, g.description, g.image_url]
+    `INSERT INTO games (title, genre_id, year, developer, platform, emoji, description, image_url)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
+    [g.title, g.genre_id, g.year, g.developer, g.platform, g.emoji, g.description, g.image_url]
   )
   const hasil = await pool.query(`${SELECT_GAME} WHERE id = $1`, [rows[0].id])
   res.status(201).json(hasil.rows[0])
@@ -71,9 +70,9 @@ app.put('/api/games/:id', h(async (req, res) => {
   const { g, galat } = bacaGame(req.body)
   if (galat.length) return res.status(400).json({ message: galat.join('. ') })
   const { rowCount } = await pool.query(
-    `UPDATE games SET title=$1, genre_id=$2, year=$3, developer=$4, rating=$5, platform=$6,
-       emoji=$7, description=$8, image_url=$9 WHERE id=$10`,
-    [g.title, g.genre_id, g.year, g.developer, g.rating, g.platform, g.emoji, g.description, g.image_url, Number(req.params.id) || 0]
+    `UPDATE games SET title=$1, genre_id=$2, year=$3, developer=$4, platform=$5,
+       emoji=$6, description=$7, image_url=$8 WHERE id=$9`,
+    [g.title, g.genre_id, g.year, g.developer, g.platform, g.emoji, g.description, g.image_url, Number(req.params.id) || 0]
   )
   if (!rowCount) return res.status(404).json({ message: 'Game tidak ditemukan' })
   const hasil = await pool.query(`${SELECT_GAME} WHERE id = $1`, [Number(req.params.id)])
@@ -101,7 +100,84 @@ app.get('/api/genres/:id', h(async (req, res) => {
   res.json({ ...rows[0], games: games.rows })
 }))
 
+
+// ---------- Review ----------
+const idGame = (req) => Number(req.params.id) || 0
+
+app.get('/api/games/:id/reviews', h(async (req, res) => {
+  const { rows } = await pool.query('SELECT * FROM reviews WHERE game_id = $1 ORDER BY created_at DESC', [idGame(req)])
+  res.json(rows)
+}))
+
+app.post('/api/games/:id/reviews', h(async (req, res) => {
+  const b = req.body || {}
+  const rating = Number(b.rating)
+  const comment = String(b.comment || '').trim().slice(0, 500)
+  const galat = []
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) galat.push('Rating harus 1 sampai 5')
+  if (!comment) galat.push('Komentar wajib diisi')
+  if (galat.length) return res.status(400).json({ message: galat.join('. ') })
+  const { rows } = await pool.query(
+    `INSERT INTO reviews (game_id, reviewer_name, rating, comment, user_id)
+     VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+    [idGame(req), String(b.reviewer_name || '').trim().slice(0, 40) || 'Anonymous', rating, comment, String(b.user_id || '') || null]
+  )
+  res.status(201).json(rows[0])
+}))
+
+// Hanya pemilik review (user_id anonim dari klien) yang boleh menghapus
+app.delete('/api/reviews/:id', h(async (req, res) => {
+  const userId = String(req.query.user_id || '')
+  const { rowCount } = await pool.query('DELETE FROM reviews WHERE id = $1 AND user_id = $2', [Number(req.params.id) || 0, userId])
+  if (!rowCount) return res.status(404).json({ message: 'Review tidak ditemukan atau bukan milik Anda' })
+  res.json({ message: 'Review dihapus' })
+}))
+
+// ---------- Quote dan momen ----------
+app.get('/api/games/:id/quotes', h(async (req, res) => {
+  const { rows } = await pool.query('SELECT * FROM quotes WHERE game_id = $1 ORDER BY created_at DESC', [idGame(req)])
+  res.json(rows)
+}))
+
+app.post('/api/games/:id/quotes', h(async (req, res) => {
+  const b = req.body || {}
+  const kind = b.kind === 'momen' ? 'momen' : b.kind === 'quote' ? 'quote' : ''
+  const content = String(b.content || '').trim().slice(0, 600)
+  const galat = []
+  if (!kind) galat.push('Jenis harus quote atau momen')
+  if (!content) galat.push('Isi wajib diisi')
+  if (galat.length) return res.status(400).json({ message: galat.join('. ') })
+  const { rows } = await pool.query(
+    'INSERT INTO quotes (game_id, kind, content, source) VALUES ($1,$2,$3,$4) RETURNING *',
+    [idGame(req), kind, content, String(b.source || '').trim().slice(0, 80) || null]
+  )
+  res.status(201).json(rows[0])
+}))
+
+app.delete('/api/quotes/:id', h(async (req, res) => {
+  const { rowCount } = await pool.query('DELETE FROM quotes WHERE id = $1', [Number(req.params.id) || 0])
+  if (!rowCount) return res.status(404).json({ message: 'Quote tidak ditemukan' })
+  res.json({ message: 'Quote dihapus' })
+}))
+
+// ---------- Aktivitas (diisi otomatis oleh trigger database) ----------
+app.get('/api/activity', h(async (req, res) => {
+  const limit = Math.min(Math.max(Number(req.query.limit) || 50, 1), 200)
+  const { rows } = await pool.query('SELECT * FROM activity_log ORDER BY created_at DESC LIMIT $1', [limit])
+  res.json(rows)
+}))
+
+// ---------- Upload cover (diteruskan ke Supabase Storage oleh server) ----------
+const TIPE_GAMBAR = ['image/jpeg', 'image/png', 'image/webp']
+app.post('/api/upload', express.raw({ type: TIPE_GAMBAR, limit: '4mb' }), h(async (req, res) => {
+  if (!Buffer.isBuffer(req.body) || !req.body.length) return res.status(400).json({ message: 'Format harus JPG, PNG, atau WebP.' })
+  res.status(201).json({ url: await simpanGambar(req.body, req.headers['content-type'].split(';')[0]) })
+}))
+
 app.use((err, req, res, next) => {
+  if (err.type === 'entity.too.large') return res.status(413).json({ message: 'Ukuran gambar maksimal 4 MB.' })
+  if (err.status && err.status !== 500) return res.status(err.status).json({ message: err.message })
+  if (err.code === '23503') return res.status(404).json({ message: 'Data induk (game atau genre) tidak ditemukan' })
   console.error(err)
   res.status(500).json({ message: 'Terjadi kesalahan pada server atau database' })
 })

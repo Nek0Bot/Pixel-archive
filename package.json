@@ -1,8 +1,8 @@
 {
   "name": "pixel-archive",
   "private": true,
-  "version": "1.2.2",
-  "description": "Pixel Archive: katalog game oleh para gamer (PWA, React + Vite + Supabase)",
+  "version": "1.3.0",
+  "description": "Pixel Archive: katalog game oleh para gamer (PWA, React + Vite + Express API + Supabase)",
   "type": "module",
   "scripts": {
     "dev": "concurrently \"node server.js\" \"vite\"",

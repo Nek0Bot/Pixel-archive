@@ -23,7 +23,7 @@ export default function Profile() {
       </div>
       <dl className="info">
         <dt>Versi</dt><dd>{__APP_VERSION__}</dd>
-        <dt>Teknologi</dt><dd>React, Vite, PWA (service worker manual), Supabase (PostgreSQL + Storage), IndexedDB (Dexie)</dd>
+        <dt>Teknologi</dt><dd>React, Vite, PWA (service worker manual), Express API, Supabase (PostgreSQL + Storage), IndexedDB (Dexie)</dd>
         <dt>Mata kuliah</dt><dd>Praktikum PPB Ganjil 2026</dd>
         <dt>Pembuat</dt><dd>Andhika Dhuta Pratama</dd>
         <dt>NIM</dt><dd>21120124130094</dd>

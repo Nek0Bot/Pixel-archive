@@ -77,7 +77,7 @@ export default function GameForm() {
           </select>
           {genres.error && <span className="state galat">Genre gagal dimuat: {genres.error}</span>}
           {!genres.loading && !genres.error && genres.data?.length === 0 && (
-            <span className="state galat">Daftar genre kosong. Periksa data tabel genres dan policy SELECT-nya di Supabase.</span>
+            <span className="state galat">Daftar genre kosong. Periksa data tabel genres dan koneksi ke API.</span>
           )}
         </label>
         <label>Tahun rilis

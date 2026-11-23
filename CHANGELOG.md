@@ -2,6 +2,12 @@
 
 Ringkasan perkembangan Pixel Archive. Nomor versi mengikuti `package.json`.
 
+## 1.3.0
+- Frontend tidak lagi memanggil Supabase langsung; semua data lewat Express API (`/api/...`)
+- Endpoint baru: review, quote, aktivitas, dan upload cover (`/api/games/:id/reviews`, `/api/games/:id/quotes`, `/api/activity`, `/api/upload`)
+- Upload cover diteruskan server ke Supabase Storage; kunci Supabase hanya ada di server
+- Proxy `/api` pada Vite untuk dev dan preview; klien Supabase dihapus dari `src/`
+
 ## 1.2.2
 - Deskripsi aplikasi diubah menjadi katalog game oleh para gamer (tidak lagi hanya indie dan retro)
 - Versi aplikasi diambil dari satu sumber (`package.json`) dan ditampilkan di halaman Profil
