@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom'
 import { getActivity } from '../services/activityService.js'
 import useFetch from '../useFetch.js'
 import usePersistedState from '../hooks/usePersistedState.js'
+import usePagination from '../hooks/usePagination.js'
 import State from '../components/State.jsx'
+import Pagination from '../components/Pagination.jsx'
 
 const JENIS = {
   game_added: { ikon: '➕', teks: (a) => `Game baru ditambahkan: ${a.game_title}` },
@@ -12,6 +14,7 @@ const JENIS = {
   review_added: { ikon: '⭐', teks: (a) => `Review baru untuk ${a.game_title}` },
   quote_added: { ikon: '💬', teks: (a) => `${a.detail === 'moment' ? 'Momen' : 'Quote'} baru untuk ${a.game_title}` }
 }
+const PER_HALAMAN = 10
 const FILTER = [
   { id: '', label: 'Semua' },
   { id: 'game', label: 'Game' },
@@ -34,6 +37,7 @@ export default function Activity() {
   const [versi, setVersi] = useState(0)
   const { data, loading, error } = useFetch(() => getActivity(), [versi])
   const items = (data?.items || []).filter((a) => !filter || a.kind.startsWith(filter))
+  const paging = usePagination(items, PER_HALAMAN, { key: 'pa_aktivitas_page', resetKey: filter })
 
   return (
     <section>
@@ -53,7 +57,7 @@ export default function Activity() {
           <p className="state">Belum ada aktivitas.</p>
         ) : (
           <ul className="daftar-kecil">
-            {items.map((a) => {
+            {paging.potong.map((a) => {
               const j = JENIS[a.kind]
               const isi = (
                 <>
@@ -73,6 +77,7 @@ export default function Activity() {
             })}
           </ul>
         )}
+        <Pagination paging={paging} satuan="aktivitas" />
       </State>
     </section>
   )

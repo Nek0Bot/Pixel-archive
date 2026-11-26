@@ -264,3 +264,11 @@ a.item.aktivitas:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(
   .app { max-width: 1280px; }
   .grid { grid-template-columns: repeat(5, 1fr); }
 }
+/* ===== Paginasi (Home, Favorit, Aktivitas) ===== */
+.paginasi { display: grid; justify-items: center; gap: 10px; margin: 22px 0 8px; }
+.paginasi-info { margin: 0; color: var(--muted); font-size: .85rem; }
+.paginasi-tombol { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; }
+.paginasi .pill { min-width: 38px; padding: 6px 0; text-align: center; }
+.paginasi .tombol.kecil { min-width: 38px; padding: 6px 0; text-align: center; }
+.paginasi .tombol:disabled { cursor: not-allowed; }
+.paginasi-titik { color: var(--muted); padding: 0 2px; }

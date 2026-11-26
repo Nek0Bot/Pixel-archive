@@ -3,9 +3,12 @@ import { Link } from 'react-router-dom'
 import { getGames, getGenres } from '../api.js'
 import useFetch from '../useFetch.js'
 import usePersistedState from '../hooks/usePersistedState.js'
+import usePagination from '../hooks/usePagination.js'
+import useGridPageSize from '../hooks/useGridPageSize.js'
 import useScrollRestore from '../hooks/useScrollRestore.js'
 import GameCard from '../components/GameCard.jsx'
 import GenreFilter from '../components/GenreFilter.jsx'
+import Pagination from '../components/Pagination.jsx'
 import State from '../components/State.jsx'
 
 const URUTAN = {
@@ -29,6 +32,10 @@ export default function Home() {
     return [...daftar].sort(URUTAN[urutan])
   }, [games.data, genre, urutan])
 
+  // Paginasi: jumlah per halaman mengikuti kolom grid; kembali ke halaman 1 saat pencarian/filter/urutan berubah
+  const perHalaman = useGridPageSize()
+  const paging = usePagination(tampil, perHalaman, { key: 'pa_home_page', resetKey: `${q}|${genre}|${urutan}` })
+
   return (
     <section>
       <div className="judul-baris">
@@ -49,9 +56,12 @@ export default function Home() {
         {tampil.length === 0 ? (
           <p className="state">Tidak ada game yang cocok dengan pencarian atau filter ini.</p>
         ) : (
-          <div className="grid">
-            {tampil.map((g) => <GameCard key={g.id} game={g} warna={warna(g.genre)} />)}
-          </div>
+          <>
+            <div className="grid">
+              {paging.potong.map((g) => <GameCard key={g.id} game={g} warna={warna(g.genre)} />)}
+            </div>
+            <Pagination paging={paging} satuan="game" />
+          </>
         )}
       </State>
     </section>

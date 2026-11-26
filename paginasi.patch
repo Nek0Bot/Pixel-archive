@@ -1,0 +1,278 @@
+diff -ruN Pixel-archive-main/src/components/Pagination.jsx Pixel-archive-main/src/components/Pagination.jsx
+--- Pixel-archive-main/src/components/Pagination.jsx	1970-01-01 00:00:00.000000000 +0000
++++ Pixel-archive-main/src/components/Pagination.jsx	2026-11-26 08:30:12.000000000 +0000
+@@ -0,0 +1,29 @@
++import { daftarHalaman } from '../lib/paginasi.js'
++
++// Navigasi halaman: ‹ 1 … 4 [5] 6 … 12 ›   (dipakai Home, Favorit, Aktivitas)
++// `paging` adalah objek hasil usePagination.
++export default function Pagination({ paging, satuan = 'item' }) {
++  const { halaman, totalHalaman, total, dari, sampai, pindah } = paging
++  if (totalHalaman <= 1) return null
++
++  return (
++    <nav className="paginasi" aria-label={`Halaman daftar ${satuan}`}>
++      <p className="paginasi-info" aria-live="polite">Menampilkan {dari}–{sampai} dari {total} {satuan}</p>
++      <div className="paginasi-tombol">
++        <button type="button" className="tombol kecil netral" onClick={() => pindah(halaman - 1)}
++          disabled={halaman === 1} aria-label="Halaman sebelumnya">‹</button>
++        {daftarHalaman(halaman, totalHalaman).map((n, i) =>
++          n === '…' ? (
++            <span key={`titik-${i}`} className="paginasi-titik" aria-hidden="true">…</span>
++          ) : (
++            <button key={n} type="button" className={`pill ${n === halaman ? 'aktif' : ''}`}
++              onClick={() => pindah(n)} aria-label={`Halaman ${n}`}
++              aria-current={n === halaman ? 'page' : undefined}>{n}</button>
++          )
++        )}
++        <button type="button" className="tombol kecil netral" onClick={() => pindah(halaman + 1)}
++          disabled={halaman === totalHalaman} aria-label="Halaman berikutnya">›</button>
++      </div>
++    </nav>
++  )
++}
+diff -ruN Pixel-archive-main/src/hooks/useGridPageSize.js Pixel-archive-main/src/hooks/useGridPageSize.js
+--- Pixel-archive-main/src/hooks/useGridPageSize.js	1970-01-01 00:00:00.000000000 +0000
++++ Pixel-archive-main/src/hooks/useGridPageSize.js	2026-11-26 08:30:12.000000000 +0000
+@@ -0,0 +1,23 @@
++import { useEffect, useState } from 'react'
++
++// Jumlah game per halaman mengikuti jumlah kolom .grid di styles.css supaya baris selalu penuh:
++//   < 900px  : 2 kolom -> 8 game  (4 baris)
++//   >= 900px : 4 kolom -> 12 game (3 baris)
++//   >= 1280px: 5 kolom -> 15 game (3 baris)
++const bacaUkuran = () => {
++  if (typeof window === 'undefined' || !window.matchMedia) return 8
++  if (window.matchMedia('(min-width: 1280px)').matches) return 15
++  if (window.matchMedia('(min-width: 900px)').matches) return 12
++  return 8
++}
++
++export default function useGridPageSize() {
++  const [ukuran, setUkuran] = useState(bacaUkuran)
++  useEffect(() => {
++    const daftar = [window.matchMedia('(min-width: 900px)'), window.matchMedia('(min-width: 1280px)')]
++    const perbarui = () => setUkuran(bacaUkuran())
++    daftar.forEach((m) => m.addEventListener('change', perbarui))
++    return () => daftar.forEach((m) => m.removeEventListener('change', perbarui))
++  }, [])
++  return ukuran
++}
+diff -ruN Pixel-archive-main/src/hooks/usePagination.js Pixel-archive-main/src/hooks/usePagination.js
+--- Pixel-archive-main/src/hooks/usePagination.js	1970-01-01 00:00:00.000000000 +0000
++++ Pixel-archive-main/src/hooks/usePagination.js	2026-11-26 08:30:12.000000000 +0000
+@@ -0,0 +1,42 @@
++import { useCallback, useEffect, useRef } from 'react'
++import usePersistedState from './usePersistedState.js'
++import { jepit, totalHalaman as hitungTotal } from '../lib/paginasi.js'
++
++// Membagi daftar menjadi halaman-halaman.
++//  - key      : kunci sessionStorage, supaya halaman aktif bertahan saat pindah halaman lalu kembali
++//  - resetKey : string berisi filter/pencarian/urutan; saat berubah, kembali ke halaman 1
++export default function usePagination(items, perHalaman, { key, resetKey = '' }) {
++  const [tersimpan, setTersimpan] = usePersistedState(key, 1)
++
++  const total = items.length
++  const jumlah = hitungTotal(total, perHalaman)
++  // Halaman yang dipakai dihitung (diturunkan) dari nilai tersimpan, bukan ditimpakan ke state.
++  // Jadi saat data masih dimuat (daftar kosong) halaman tersimpan tidak hilang.
++  const halaman = jepit(tersimpan, total, perHalaman)
++
++  // Filter/pencarian/urutan berubah -> halaman 1. Perubahan pertama (saat dimuat) diabaikan.
++  const awal = useRef(resetKey)
++  useEffect(() => {
++    if (awal.current === resetKey) return
++    awal.current = resetKey
++    setTersimpan(1)
++  }, [resetKey, setTersimpan])
++
++  const pindah = useCallback((n) => {
++    setTersimpan(jepit(n, total, perHalaman))
++    window.scrollTo({ top: 0, behavior: 'smooth' })
++  }, [setTersimpan, total, perHalaman])
++
++  const mulai = (halaman - 1) * perHalaman
++  const potong = items.slice(mulai, mulai + perHalaman)
++
++  return {
++    potong,                              // item untuk halaman aktif
++    halaman,
++    totalHalaman: jumlah,
++    total,
++    dari: total ? mulai + 1 : 0,
++    sampai: mulai + potong.length,
++    pindah
++  }
++}
+diff -ruN Pixel-archive-main/src/lib/paginasi.js Pixel-archive-main/src/lib/paginasi.js
+--- Pixel-archive-main/src/lib/paginasi.js	1970-01-01 00:00:00.000000000 +0000
++++ Pixel-archive-main/src/lib/paginasi.js	2026-11-26 08:30:12.000000000 +0000
+@@ -0,0 +1,21 @@
++// Logika paginasi murni (tanpa React) agar mudah diuji dan dipakai ulang.
++
++// Jumlah halaman minimal 1, walau datanya kosong.
++export const totalHalaman = (total, perHalaman) => Math.max(1, Math.ceil(total / perHalaman))
++
++// Menjepit nomor halaman ke rentang 1..totalHalaman (nilai aneh dari penyimpanan dianggap 1).
++export const jepit = (halaman, total, perHalaman) =>
++  Math.min(Math.max(1, Math.floor(Number(halaman)) || 1), totalHalaman(total, perHalaman))
++
++// Daftar tombol nomor yang ditampilkan, mis. [1, '…', 4, 5, 6, '…', 12].
++// Selalu memuat halaman pertama, terakhir, dan halaman aktif beserta tetangganya.
++export function daftarHalaman(sekarang, total) {
++  const wajib = [1, total, sekarang - 1, sekarang, sekarang + 1]
++  const urut = [...new Set(wajib)].filter((n) => n >= 1 && n <= total).sort((a, b) => a - b)
++  const hasil = []
++  urut.forEach((n, i) => {
++    if (i > 0 && n - urut[i - 1] > 1) hasil.push('…')
++    hasil.push(n)
++  })
++  return hasil
++}
+diff -ruN Pixel-archive-main/src/pages/Activity.jsx Pixel-archive-main/src/pages/Activity.jsx
+--- Pixel-archive-main/src/pages/Activity.jsx	2026-11-26 04:56:10.000000000 +0000
++++ Pixel-archive-main/src/pages/Activity.jsx	2026-11-26 08:30:21.000000000 +0000
+@@ -3,7 +3,9 @@
+ import { getActivity } from '../services/activityService.js'
+ import useFetch from '../useFetch.js'
+ import usePersistedState from '../hooks/usePersistedState.js'
++import usePagination from '../hooks/usePagination.js'
+ import State from '../components/State.jsx'
++import Pagination from '../components/Pagination.jsx'
+ 
+ const JENIS = {
+   game_added: { ikon: '➕', teks: (a) => `Game baru ditambahkan: ${a.game_title}` },
+@@ -12,6 +14,7 @@
+   review_added: { ikon: '⭐', teks: (a) => `Review baru untuk ${a.game_title}` },
+   quote_added: { ikon: '💬', teks: (a) => `${a.detail === 'moment' ? 'Momen' : 'Quote'} baru untuk ${a.game_title}` }
+ }
++const PER_HALAMAN = 10
+ const FILTER = [
+   { id: '', label: 'Semua' },
+   { id: 'game', label: 'Game' },
+@@ -34,6 +37,7 @@
+   const [versi, setVersi] = useState(0)
+   const { data, loading, error } = useFetch(() => getActivity(), [versi])
+   const items = (data?.items || []).filter((a) => !filter || a.kind.startsWith(filter))
++  const paging = usePagination(items, PER_HALAMAN, { key: 'pa_aktivitas_page', resetKey: filter })
+ 
+   return (
+     <section>
+@@ -53,7 +57,7 @@
+           <p className="state">Belum ada aktivitas.</p>
+         ) : (
+           <ul className="daftar-kecil">
+-            {items.map((a) => {
++            {paging.potong.map((a) => {
+               const j = JENIS[a.kind]
+               const isi = (
+                 <>
+@@ -73,6 +77,7 @@
+             })}
+           </ul>
+         )}
++        <Pagination paging={paging} satuan="aktivitas" />
+       </State>
+     </section>
+   )
+diff -ruN Pixel-archive-main/src/pages/Favorites.jsx Pixel-archive-main/src/pages/Favorites.jsx
+--- Pixel-archive-main/src/pages/Favorites.jsx	2026-11-26 04:56:10.000000000 +0000
++++ Pixel-archive-main/src/pages/Favorites.jsx	2026-11-26 08:30:25.000000000 +0000
+@@ -2,8 +2,11 @@
+ import { getGames, getGenres } from '../api.js'
+ import useFetch from '../useFetch.js'
+ import useFavorites from '../hooks/useFavorites.js'
++import usePagination from '../hooks/usePagination.js'
++import useGridPageSize from '../hooks/useGridPageSize.js'
+ import GameCard from '../components/GameCard.jsx'
+ import State from '../components/State.jsx'
++import Pagination from '../components/Pagination.jsx'
+ 
+ export default function Favorites() {
+   const { ids } = useFavorites()
+@@ -11,6 +14,8 @@
+   const genres = useFetch(getGenres, [])
+   const warna = (id) => genres.data?.find((g) => g.id === id)?.warna || '#5B7FE8'
+   const daftar = (games.data || []).filter((g) => ids.includes(g.id))
++  const perHalaman = useGridPageSize()
++  const paging = usePagination(daftar, perHalaman, { key: 'pa_favorit_page' })
+ 
+   return (
+     <section>
+@@ -20,9 +25,12 @@
+         {daftar.length === 0 ? (
+           <p className="state">Belum ada favorit. Ketuk ikon hati pada game, atau <Link to="/">jelajahi katalog</Link>.</p>
+         ) : (
+-          <div className="grid">
+-            {daftar.map((g) => <GameCard key={g.id} game={g} warna={warna(g.genre)} />)}
+-          </div>
++          <>
++            <div className="grid">
++              {paging.potong.map((g) => <GameCard key={g.id} game={g} warna={warna(g.genre)} />)}
++            </div>
++            <Pagination paging={paging} satuan="favorit" />
++          </>
+         )}
+       </State>
+     </section>
+diff -ruN Pixel-archive-main/src/pages/Home.jsx Pixel-archive-main/src/pages/Home.jsx
+--- Pixel-archive-main/src/pages/Home.jsx	2026-11-26 04:56:10.000000000 +0000
++++ Pixel-archive-main/src/pages/Home.jsx	2026-11-26 08:30:21.000000000 +0000
+@@ -3,9 +3,12 @@
+ import { getGames, getGenres } from '../api.js'
+ import useFetch from '../useFetch.js'
+ import usePersistedState from '../hooks/usePersistedState.js'
++import usePagination from '../hooks/usePagination.js'
++import useGridPageSize from '../hooks/useGridPageSize.js'
+ import useScrollRestore from '../hooks/useScrollRestore.js'
+ import GameCard from '../components/GameCard.jsx'
+ import GenreFilter from '../components/GenreFilter.jsx'
++import Pagination from '../components/Pagination.jsx'
+ import State from '../components/State.jsx'
+ 
+ const URUTAN = {
+@@ -29,6 +32,10 @@
+     return [...daftar].sort(URUTAN[urutan])
+   }, [games.data, genre, urutan])
+ 
++  // Paginasi: jumlah per halaman mengikuti kolom grid; kembali ke halaman 1 saat pencarian/filter/urutan berubah
++  const perHalaman = useGridPageSize()
++  const paging = usePagination(tampil, perHalaman, { key: 'pa_home_page', resetKey: `${q}|${genre}|${urutan}` })
++
+   return (
+     <section>
+       <div className="judul-baris">
+@@ -49,9 +56,12 @@
+         {tampil.length === 0 ? (
+           <p className="state">Tidak ada game yang cocok dengan pencarian atau filter ini.</p>
+         ) : (
+-          <div className="grid">
+-            {tampil.map((g) => <GameCard key={g.id} game={g} warna={warna(g.genre)} />)}
+-          </div>
++          <>
++            <div className="grid">
++              {paging.potong.map((g) => <GameCard key={g.id} game={g} warna={warna(g.genre)} />)}
++            </div>
++            <Pagination paging={paging} satuan="game" />
++          </>
+         )}
+       </State>
+     </section>
+diff -ruN Pixel-archive-main/src/styles.css Pixel-archive-main/src/styles.css
+--- Pixel-archive-main/src/styles.css	2026-11-26 04:56:10.000000000 +0000
++++ Pixel-archive-main/src/styles.css	2026-11-26 08:30:12.000000000 +0000
+@@ -263,4 +263,12 @@
+ @media (min-width: 1280px) {
+   .app { max-width: 1280px; }
+   .grid { grid-template-columns: repeat(5, 1fr); }
+-}
+\ No newline at end of file
++}
++/* ===== Paginasi (Home, Favorit, Aktivitas) ===== */
++.paginasi { display: grid; justify-items: center; gap: 10px; margin: 22px 0 8px; }
++.paginasi-info { margin: 0; color: var(--muted); font-size: .85rem; }
++.paginasi-tombol { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; }
++.paginasi .pill { min-width: 38px; padding: 6px 0; text-align: center; }
++.paginasi .tombol.kecil { min-width: 38px; padding: 6px 0; text-align: center; }
++.paginasi .tombol:disabled { cursor: not-allowed; }
++.paginasi-titik { color: var(--muted); padding: 0 2px; }
