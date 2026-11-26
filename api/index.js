@@ -33,6 +33,33 @@ app.get('/api/health/db', async (req, res) => {
   }
 })
 
+// Pemeriksaan skema: menunjukkan tabel, kolom, dan trigger yang belum ada di database yang dipakai server
+const SKEMA = {
+  genres: ['id', 'nama', 'emoji', 'warna', 'deskripsi'],
+  games: ['id', 'title', 'genre_id', 'year', 'developer', 'rating', 'platform', 'emoji', 'description', 'image_url'],
+  reviews: ['id', 'game_id', 'user_id', 'reviewer_name', 'rating', 'comment', 'created_at'],
+  quotes: ['id', 'game_id', 'kind', 'content', 'source', 'created_at'],
+  activity_log: ['id', 'kind', 'game_id', 'game_title', 'detail', 'created_at']
+}
+const TRIGGER = ['trg_refresh_game_rating', 'trg_log_game_change', 'trg_log_review_added', 'trg_log_quote_added']
+
+app.get('/api/health/schema', (req, res, next) => (async () => {
+  const kol = await pool.query(
+    `SELECT table_name, column_name FROM information_schema.columns
+     WHERE table_schema = 'public' AND table_name = ANY($1)`, [Object.keys(SKEMA)])
+  const ada = {}
+  for (const r of kol.rows) (ada[r.table_name] ||= new Set()).add(r.column_name)
+  const kurang = []
+  for (const [tabel, cols] of Object.entries(SKEMA)) {
+    if (!ada[tabel]) { kurang.push(`tabel ${tabel} tidak ada`); continue }
+    for (const c of cols) if (!ada[tabel].has(c)) kurang.push(`kolom ${tabel}.${c} tidak ada`)
+  }
+  const trg = await pool.query('SELECT tgname FROM pg_trigger WHERE NOT tgisinternal AND tgname = ANY($1)', [TRIGGER])
+  const adaTrg = new Set(trg.rows.map((r) => r.tgname))
+  for (const t of TRIGGER) if (!adaTrg.has(t)) kurang.push(`trigger ${t} tidak ada`)
+  const db = await pool.query('SELECT current_database() AS nama')
+  res.status(kurang.length ? 503 : 200).json({ database: db.rows[0].nama, status: kurang.length ? 'tidak lengkap' : 'lengkap', kurang })
+})().catch(next))
 
 const SELECT_GAME = `SELECT id, title, genre_id AS genre, year, developer, rating::float AS rating,
   platform, emoji, description, image_url FROM games`
@@ -205,8 +232,9 @@ app.use((err, req, res, next) => {
   if (err.type === 'entity.too.large') return res.status(413).json({ message: 'Ukuran gambar maksimal 4 MB.' })
   if (err.status && err.status !== 500) return res.status(err.status).json({ message: err.message })
   if (err.code === '23503') return res.status(404).json({ message: 'Data induk (game atau genre) tidak ditemukan' })
-  console.error(err)
-  res.status(500).json({ message: 'Terjadi kesalahan pada server atau database' })
+    console.error(err)
+  const kode = err.code ? ` (kode ${err.code})` : ''
+  res.status(500).json({ message: `Terjadi kesalahan pada server atau database${kode}` })
 })
 
 export default app
