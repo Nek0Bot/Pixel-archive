@@ -7,7 +7,6 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-import { pool, testDatabase } from './db.js'
 
 // Database health check
 app.get('/api/health/db', async (req, res) => {
